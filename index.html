@@ -22,7 +22,7 @@
         .fa-youtube { color: var(--yt); } .fa-facebook-f { color: var(--fb); } .fa-instagram { color: var(--insta); } .fa-tiktok { color: white; }
         
         h2 { margin: 0; font-size: 28px; font-weight: 900; }
-        .kurdist-title { color: var(--primary); font-size: 15px; display: block; margin-bottom: 25px; font-weight: 600; }
+        .kurdist-title { color: var(--primary); font-size: 15px; display: block; margin-top: 5px; margin-bottom: 25px; font-weight: 600; }
         
         input { width: 100%; background: #0a0f1a; border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 18px; color: white; text-align: center; outline: none; margin-bottom: 15px; }
         .paste-btn { background: rgba(0, 242, 254, 0.1); border: 1.5px solid var(--primary); color: var(--primary); padding: 8px 25px; border-radius: 12px; cursor: pointer; margin-bottom: 20px; }
@@ -30,12 +30,11 @@
 
         .video-container { position: relative; width: 100%; border-radius: 20px; overflow: hidden; border: 1px solid var(--primary); margin-top: 20px; }
         video { width: 100%; display: block; background: black; }
-        .share-btn-ios { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: var(--primary); border: 1.5px solid var(--primary); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .share-btn-ios { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: var(--primary); border: 1.5px solid var(--primary); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; }
 
         .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px; }
         .acc-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 18px; color: white; text-decoration: none; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        /* History & Stats Styles */
         .stat-item { background: rgba(0, 242, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
         .history-list { font-size: 11px; text-align: right; max-height: 300px; overflow-y: auto; }
         .h-item { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
@@ -48,7 +47,7 @@
     <div class="sidebar" id="sidebar">
         <h3 style="color:var(--primary)">دەستپێک</h3>
         <div class="stat-item">ڤیدیۆ داگیراوەکان: <span id="countNum">763</span></div>
-        <p style="font-size: 12px; color: #888;">چۆنیەتی بەکارهێنان:<br>لینکەکە لێرە پەیست بکە و Execute دابگرە، پاشان کلیک لە ئایکۆنی شەیر بکە بۆ سەیڤکردن.</p>
+        <p style="font-size: 12px; color: #888;">چۆنیەتی بەکارهێنان:<br>لینکەکە پەیست بکە و Execute دابگرە، پاشان کلیک لە ئایکۆنی شەیر بکە بۆ سەیڤکردن.</p>
         <hr style="opacity:0.1">
         <h4 style="color:var(--primary)">مێژووی داگرتن</h4>
         <div id="historyLog" class="history-list"></div>
@@ -80,8 +79,10 @@
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
 
         async function pasteLink() {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('linkInput').value = text;
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('linkInput').value = text;
+            } catch (err) {}
         }
 
         async function downloadVideo() {
@@ -98,7 +99,6 @@
                     document.getElementById('countNum').innerText = count;
                     const vUrl = data.data.play;
                     
-                    // Add to History
                     const now = new Date();
                     const hLog = document.getElementById('historyLog');
                     const platform = val.includes('tiktok') ? 'TikTok' : val.includes('instagram') ? 'Instagram' : 'Video';
@@ -115,10 +115,14 @@
         }
 
         async function iosShare(url) {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const file = new File([blob], "kandesh_video.mp4", { type: "video/mp4" });
-            if (navigator.share) { await navigator.share({ files: [file] }); }
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const file = new File([blob], "video.mp4", { type: "video/mp4" });
+                if (navigator.share) {
+                    await navigator.share({ files: [file] });
+                } else { window.open(url, '_blank'); }
+            } catch (s) { window.open(url, '_blank'); }
         }
     </script>
 </body>
