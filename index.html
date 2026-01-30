@@ -93,39 +93,42 @@
             const res = document.getElementById('result');
             res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Loading...</p>";
 
-            try {
-                // بەکارهێنانی سێرڤەرێکی بەهێزتر کە پشتگیری هەموو پلاتفۆرمەکان دەکات
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://social-download-all-in-one.vercel.app/api/download?url=' + val)}`);
-                const proxyData = await response.json();
-                const data = JSON.parse(proxyData.contents);
+            // دیاریکردنی سێرڤەر بەپێی جۆری لینکەکە
+            let apiUrl = '';
+            if(val.includes('tiktok.com')) {
+                apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(val)}`;
+            } else {
+                // سێرڤەری گشتگیر بۆ سناپچات و ئینستاگرام
+                apiUrl = `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(val)}`;
+            }
 
-                if(data.url || (data.medias && data.medias.length > 0)) {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                let finalUrl = '';
+                if(data.code === 0 && data.data) { finalUrl = data.data.play; } // TikWM
+                else if(data.result) { finalUrl = data.result.video || data.result.url; } // TiklyDown
+
+                if(finalUrl) {
                     confetti();
                     count++;
                     document.getElementById('countNum').innerText = count;
                     
-                    // وەرگرتنی لینکی ڤیدیۆکە
-                    const vUrl = data.url || data.medias[0].url;
-                    
                     const now = new Date();
                     const hLog = document.getElementById('historyLog');
-                    let platform = 'Video';
-                    if(val.includes('tiktok')) platform = 'TikTok';
-                    else if(val.includes('snapchat')) platform = 'Snapchat';
-                    else if(val.includes('instagram')) platform = 'Instagram';
-                    else if(val.includes('youtube') || val.includes('youtu.be')) platform = 'YouTube';
-
+                    let platform = val.includes('tiktok') ? 'TikTok' : val.includes('snap') ? 'Snapchat' : val.includes('insta') ? 'Instagram' : 'Video';
                     hLog.innerHTML = `<div class="h-item">${platform} - ${now.toLocaleTimeString()}</div>` + hLog.innerHTML;
 
                     res.innerHTML = `
                         <div class="video-container">
-                            <div class="share-btn-ios" onclick="iosShare('${vUrl}')"><i class="fas fa-share-nodes"></i></div>
-                            <video controls playsinline src="${vUrl}"></video>
+                            <div class="share-btn-ios" onclick="iosShare('${finalUrl}')"><i class="fas fa-share-nodes"></i></div>
+                            <video controls playsinline src="${finalUrl}"></video>
                         </div>
                     `;
-                } else { res.innerHTML = "<p style='color:red;'>ببورە، لینکەکە هەڵەیە یان پشتگیری ناکرێت!</p>"; }
+                } else { res.innerHTML = "<p style='color:red;'>ببورە، کێشەیەک هەیە، دووبارە تاقی بکەرەوە!</p>"; }
             } catch (e) { 
-                res.innerHTML = "<p style='color:red;'>کێشەی سێرڤەر! دووبارە تاقی بکەرەوە.</p>"; 
+                res.innerHTML = "<p style='color:red;'>سێرڤەر وەڵام نادات، تکایە کەمێکی تر تاقی بکەرەوە.</p>"; 
             }
         }
 
@@ -134,9 +137,8 @@
                 const response = await fetch(url);
                 const blob = await response.blob();
                 const file = new File([blob], "video.mp4", { type: "video/mp4" });
-                if (navigator.share) {
-                    await navigator.share({ files: [file] });
-                } else { window.open(url, '_blank'); }
+                if (navigator.share) { await navigator.share({ files: [file] }); }
+                else { window.open(url, '_blank'); }
             } catch (s) { window.open(url, '_blank'); }
         }
     </script>
