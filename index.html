@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>ENGINEER KANDESH - Pro Downloader</title>
+    <title>ENGINEER KANDESH - Professional Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -45,7 +45,7 @@
     <div class="sidebar" id="sidebar">
         <h3 style="color:var(--primary)">دەستپێک</h3>
         <div style="background: rgba(0, 242, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px;">ڤیدیۆ داگیراوەکان: <span id="countNum">763</span></div>
-        <p style="font-size: 12px; color: #888;">پشتگیری تیکتۆک، ئینستاگرام و یوتیوب بە سێرڤەری جیاواز.</p>
+        <p style="font-size: 11px; color: #888;">Fix: Instagram & YouTube added.</p>
     </div>
 
     <div class="glass-box">
@@ -84,26 +84,26 @@
             const val = document.getElementById('linkInput').value.trim();
             if(!val) return;
             const res = document.getElementById('result');
-            res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Loading...</p>";
+            res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Searching video...</p>";
 
             try {
                 let vUrl = "";
-                
-                // جیاکردنەوەی پلاتفۆرمەکان
+
+                // سێرڤەری تیکتۆک (وەک خۆی چونکە ئیش دەکات)
                 if (val.includes('tiktok.com')) {
                     const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(val)}`);
                     const data = await response.json();
                     if(data.data) vUrl = data.data.play;
                 } 
-                else if (val.includes('youtube.com') || val.includes('youtu.be') || val.includes('instagram.com')) {
-                    // بەکارهێنانی سێرڤەری Cobalt بۆ یوتیوب و ئینستاگرام
-                    const response = await fetch("https://api.cobalt.tools/api/json", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                        body: JSON.stringify({ url: val, videoQuality: "720" })
-                    });
+                // سێرڤەرێکی بەهێز بۆ ئینستاگرام و یوتیوب (AIO)
+                else {
+                    const response = await fetch(`https://api.vkrdown.com/server/index.php?url=${encodeURIComponent(val)}`);
                     const data = await response.json();
-                    if(data.url) vUrl = data.url;
+                    if(data.data && data.data.url) {
+                        vUrl = data.data.url;
+                    } else if (data.data && data.data.medias) {
+                        vUrl = data.data.medias[0].url;
+                    }
                 }
 
                 if (vUrl) {
@@ -117,10 +117,10 @@
                         </div>
                     `;
                 } else {
-                    res.innerHTML = "<p style='color:red;'>ببورە، سێرڤەر نەیتوانی ئەم ڤیدیۆیە بهێنێت!</p>";
+                    res.innerHTML = "<p style='color:red;'>ببورە، ئەم لینکە لەلایەن سێرڤەرەوە بلۆک کراوە!</p>";
                 }
             } catch (e) {
-                res.innerHTML = "<p style='color:red;'>کێشەی سێرڤەر! تکایە کەمێکی تر تاقی بکەرەوە.</p>";
+                res.innerHTML = "<p style='color:red;'>هەڵەیەک ڕوویدا، تکایە دووبارە تاقی بکەرەوە.</p>";
             }
         }
 
