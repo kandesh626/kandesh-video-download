@@ -45,7 +45,7 @@
     <div class="sidebar" id="sidebar">
         <h3 style="color:var(--primary)">دەستپێک</h3>
         <div style="background: rgba(0, 242, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px;">ڤیدیۆ داگیراوەکان: <span id="countNum">763</span></div>
-        <p style="font-size: 12px; color: #888;">ئەم سایتە تیکتۆک و ئینستاگرام و یوتیوب بە باشی پشتگیری دەکات.</p>
+        <p style="font-size: 12px; color: #888;">پشتیگری: تیکتۆک، ئینستاگرام، یوتیوب، سناپچات.</p>
     </div>
 
     <div class="glass-box">
@@ -86,28 +86,39 @@
             const res = document.getElementById('result');
             res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Loading...</p>";
 
-            // بەکارهێنانی سێرڤەری TikWM کە جێگیرترینە بۆ تیکتۆک و زۆربەی پلاتفۆرمەکان
             try {
-                const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(val)}`);
+                // بەکارهێنانی سێرڤەری Cobalt کە باشترینە بۆ هەموو جۆرە لینکەکان
+                const response = await fetch("https://api.cobalt.tools/api/json", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: val,
+                        videoQuality: "720",
+                        downloadMode: "video"
+                    })
+                });
+
                 const data = await response.json();
 
-                if(data.code === 0) {
+                if(data.url) {
                     confetti();
                     count++;
                     document.getElementById('countNum').innerText = count;
-                    const vUrl = data.data.play;
                     
                     res.innerHTML = `
                         <div class="video-container">
-                            <div class="share-btn-ios" onclick="iosShare('${vUrl}')"><i class="fas fa-share-nodes"></i></div>
-                            <video controls playsinline src="${vUrl}"></video>
+                            <div class="share-btn-ios" onclick="iosShare('${data.url}')"><i class="fas fa-share-nodes"></i></div>
+                            <video controls playsinline src="${data.url}"></video>
                         </div>
                     `;
                 } else {
-                    res.innerHTML = "<p style='color:red;'>ببورە، ئەم لینکە پشتگیری ناکرێت!</p>";
+                    res.innerHTML = "<p style='color:red;'>ببورە، ئەم ڤیدیۆیە تایبەتە (Private) یان لینکەکە هەڵەیە!</p>";
                 }
             } catch (e) {
-                res.innerHTML = "<p style='color:red;'>کێشەیەک هەیە، تکایە دووبارە تاقی بکەرەوە.</p>";
+                res.innerHTML = "<p style='color:red;'>کێشەی سێرڤەر! تکایە دووبارە تاقی بکەرەوە.</p>";
             }
         }
 
