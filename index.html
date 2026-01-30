@@ -94,21 +94,18 @@
             res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Loading...</p>";
 
             try {
-                const response = await fetch('https://api.cobalt.tools/api/json', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: val })
-                });
-                const data = await response.json();
+                // بەکارهێنانی سێرڤەرێکی بەهێزتر کە پشتگیری هەموو پلاتفۆرمەکان دەکات
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://social-download-all-in-one.vercel.app/api/download?url=' + val)}`);
+                const proxyData = await response.json();
+                const data = JSON.parse(proxyData.contents);
 
-                if(data.url) {
+                if(data.url || (data.medias && data.medias.length > 0)) {
                     confetti();
                     count++;
                     document.getElementById('countNum').innerText = count;
-                    const vUrl = data.url;
+                    
+                    // وەرگرتنی لینکی ڤیدیۆکە
+                    const vUrl = data.url || data.medias[0].url;
                     
                     const now = new Date();
                     const hLog = document.getElementById('historyLog');
@@ -116,6 +113,7 @@
                     if(val.includes('tiktok')) platform = 'TikTok';
                     else if(val.includes('snapchat')) platform = 'Snapchat';
                     else if(val.includes('instagram')) platform = 'Instagram';
+                    else if(val.includes('youtube') || val.includes('youtu.be')) platform = 'YouTube';
 
                     hLog.innerHTML = `<div class="h-item">${platform} - ${now.toLocaleTimeString()}</div>` + hLog.innerHTML;
 
@@ -125,8 +123,10 @@
                             <video controls playsinline src="${vUrl}"></video>
                         </div>
                     `;
-                } else { res.innerHTML = "<p style='color:red;'>Link Error or Unsupported!</p>"; }
-            } catch (e) { res.innerHTML = "<p style='color:red;'>Service Error!</p>"; }
+                } else { res.innerHTML = "<p style='color:red;'>ببورە، لینکەکە هەڵەیە یان پشتگیری ناکرێت!</p>"; }
+            } catch (e) { 
+                res.innerHTML = "<p style='color:red;'>کێشەی سێرڤەر! دووبارە تاقی بکەرەوە.</p>"; 
+            }
         }
 
         async function iosShare(url) {
