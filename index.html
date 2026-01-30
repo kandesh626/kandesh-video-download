@@ -93,22 +93,15 @@
             const res = document.getElementById('result');
             res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Loading...</p>";
 
-            // دیاریکردنی سێرڤەر بەپێی جۆری لینکەکە
-            let apiUrl = '';
-            if(val.includes('tiktok.com')) {
-                apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(val)}`;
-            } else {
-                // سێرڤەری گشتگیر بۆ سناپچات و ئینستاگرام
-                apiUrl = `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(val)}`;
-            }
-
             try {
-                const response = await fetch(apiUrl);
+                // بەکارهێنانی سێرڤەری Shaked کە زۆر بەهێزە بۆ ئینستا و سناپ
+                const response = await fetch(`https://api.shaked.me/download?url=${encodeURIComponent(val)}`);
                 const data = await response.json();
 
                 let finalUrl = '';
-                if(data.code === 0 && data.data) { finalUrl = data.data.play; } // TikWM
-                else if(data.result) { finalUrl = data.result.video || data.result.url; } // TiklyDown
+                if(data.status === "success") {
+                    finalUrl = data.url || (data.medias && data.medias[0].url);
+                }
 
                 if(finalUrl) {
                     confetti();
@@ -126,9 +119,11 @@
                             <video controls playsinline src="${finalUrl}"></video>
                         </div>
                     `;
-                } else { res.innerHTML = "<p style='color:red;'>ببورە، کێشەیەک هەیە، دووبارە تاقی بکەرەوە!</p>"; }
+                } else {
+                    res.innerHTML = "<p style='color:red;'>لینکەکە کار ناکات، دڵنیابەرەوە کە پۆستەکە Publicـە!</p>";
+                }
             } catch (e) { 
-                res.innerHTML = "<p style='color:red;'>سێرڤەر وەڵام نادات، تکایە کەمێکی تر تاقی بکەرەوە.</p>"; 
+                res.innerHTML = "<p style='color:red;'>سێرڤەر وەڵام نادات، تکایە جارێکی تر تاقی بکەرەوە.</p>"; 
             }
         }
 
