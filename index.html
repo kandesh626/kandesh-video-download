@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>ENGINEER KANDESH - Professional Hub</title>
+    <title>ENGINEER KANDESH - Ultimate Downloader</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -45,7 +45,7 @@
     <div class="sidebar" id="sidebar">
         <h3 style="color:var(--primary)">دەستپێک</h3>
         <div style="background: rgba(0, 242, 254, 0.1); padding: 10px; border-radius: 10px; margin-bottom: 20px;">ڤیدیۆ داگیراوەکان: <span id="countNum">763</span></div>
-        <p style="font-size: 11px; color: #888;">Fix: Instagram & YouTube added.</p>
+        <p style="font-size: 11px; color: #888;">پشتگیری تیکتۆک، ئینستاگرام و یوتیوب.</p>
     </div>
 
     <div class="glass-box">
@@ -84,54 +84,49 @@
             const val = document.getElementById('linkInput').value.trim();
             if(!val) return;
             const res = document.getElementById('result');
-            res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>Searching video...</p>";
+            res.innerHTML = "<p style='color:var(--primary); margin: 15px 0;'>بۆستە... خەریکە ڤیدیۆکە دەهێنم</p>";
 
             try {
-                let vUrl = "";
-
-                // سێرڤەری تیکتۆک (وەک خۆی چونکە ئیش دەکات)
+                // بەکارهێنانی سێرڤەری Loader.to بۆ یوتیوب و ئینستاگرام چونکە زۆر جێگیرە
+                let apiUrl = `https://loader.to/api/button/?url=${encodeURIComponent(val)}&f=mp4`;
+                
                 if (val.includes('tiktok.com')) {
                     const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(val)}`);
                     const data = await response.json();
-                    if(data.data) vUrl = data.data.play;
-                } 
-                // سێرڤەرێکی بەهێز بۆ ئینستاگرام و یوتیوب (AIO)
-                else {
-                    const response = await fetch(`https://api.vkrdown.com/server/index.php?url=${encodeURIComponent(val)}`);
-                    const data = await response.json();
-                    if(data.data && data.data.url) {
-                        vUrl = data.data.url;
-                    } else if (data.data && data.data.medias) {
-                        vUrl = data.data.medias[0].url;
+                    if(data.data) {
+                        showVideo(data.data.play);
+                        return;
                     }
                 }
 
-                if (vUrl) {
-                    confetti();
-                    count++;
-                    document.getElementById('countNum').innerText = count;
-                    res.innerHTML = `
-                        <div class="video-container">
-                            <div class="share-btn-ios" onclick="iosShare('${vUrl}')"><i class="fas fa-share-nodes"></i></div>
-                            <video controls playsinline src="${vUrl}"></video>
-                        </div>
-                    `;
-                } else {
-                    res.innerHTML = "<p style='color:red;'>ببورە، ئەم لینکە لەلایەن سێرڤەرەوە بلۆک کراوە!</p>";
-                }
+                // بۆ یوتیوب و ئینستاگرام، چونکە سێرڤەری ئاسایی بلۆکە، باشترە دوگمەی داگرتن نیشان بدەین کە سەد لە سەد کار دەکات
+                res.innerHTML = `
+                    <div style="padding: 20px; border: 1.5px solid var(--primary); border-radius: 20px;">
+                        <p style="color:white; font-size: 14px; margin-bottom: 15px;">ڤیدیۆکە ئامادەیە!</p>
+                        <iframe src="${apiUrl}" width="100%" height="100px" scrolling="no" style="border:none;"></iframe>
+                        <p style="font-size: 10px; color: #888; margin-top: 10px;">ئەمە جێگیرترین ڕێگەیە بۆ ئینستاگرام و یوتیوب.</p>
+                    </div>
+                `;
+                confetti();
             } catch (e) {
-                res.innerHTML = "<p style='color:red;'>هەڵەیەک ڕوویدا، تکایە دووبارە تاقی بکەرەوە.</p>";
+                res.innerHTML = "<p style='color:red;'>ببورە، کێشەیەک لە سێرڤەر هەیە.</p>";
             }
         }
 
+        function showVideo(url) {
+            confetti();
+            count++;
+            document.getElementById('countNum').innerText = count;
+            document.getElementById('result').innerHTML = `
+                <div class="video-container">
+                    <div class="share-btn-ios" onclick="iosShare('${url}')"><i class="fas fa-share-nodes"></i></div>
+                    <video controls playsinline src="${url}"></video>
+                </div>
+            `;
+        }
+
         async function iosShare(url) {
-            try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                const file = new File([blob], "video.mp4", { type: "video/mp4" });
-                if (navigator.share) await navigator.share({ files: [file] });
-                else window.open(url, '_blank');
-            } catch (s) { window.open(url, '_blank'); }
+            window.open(url, '_blank');
         }
     </script>
 </body>
